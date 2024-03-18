@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34701.34
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KolegoveDBS", "KolegoveDBS\KolegoveDBS.csproj", "{B90D2FE8-75C3-4745-9B1B-00A0EFD87C1A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B90D2FE8-75C3-4745-9B1B-00A0EFD87C1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B90D2FE8-75C3-4745-9B1B-00A0EFD87C1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B90D2FE8-75C3-4745-9B1B-00A0EFD87C1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B90D2FE8-75C3-4745-9B1B-00A0EFD87C1A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CD1F4973-190A-45CD-BB2A-ED00040AFCEC}
+	EndGlobalSection
+EndGlobal
