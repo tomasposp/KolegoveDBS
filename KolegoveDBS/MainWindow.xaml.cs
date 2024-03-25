@@ -1,4 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
+using System.Reflection;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Windows;
@@ -19,12 +20,39 @@ namespace KolegoveDBS
     /// </summary>
     public partial class MainWindow : Window
     {
-        public static int login = 0;
-        public static int userId;
-
-        public MainWindow()
-        {
+        public int login = 0;
+        public int userId;
+        public MainWindow() {
             InitializeComponent();
+
+            Initialize();
+        }
+        public MainWindow(int login, int userId)
+        {
+            this.login = login;
+            this.userId = userId;
+            InitializeComponent();
+
+            Initialize();
+
+        }
+
+        private void Initialize() {
+            if (login == 0)
+            {
+                SignOut.Visibility = Visibility.Hidden;
+                Login.Visibility = Visibility.Visible;
+                Register.Visibility = Visibility.Visible;
+                Profile.Visibility = Visibility.Hidden;
+            }
+            if (login == 1)
+            {
+                SignOut.Visibility = Visibility.Visible;
+                Login.Visibility = Visibility.Hidden;
+                Register.Visibility = Visibility.Hidden;
+                Profile.Visibility = Visibility.Visible;
+            }
+            stackPanelButtons.Children.Clear();
 
             StringBuilder bu = new StringBuilder();
             string server = "localhost";
@@ -39,7 +67,7 @@ namespace KolegoveDBS
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     MySqlDataReader reader = cmd.ExecuteReader();
-                    
+
                     while (reader.Read())
                     {
                         string restaurantName = reader.GetString(1);
@@ -57,7 +85,6 @@ namespace KolegoveDBS
             int restaurantId = (int)((Button)sender).Tag;
             RestaurantInfo win = new RestaurantInfo(restaurantId);
             win.Show();
-            LoginLB.Content = login;
         }
 
         private void Register_Click(object sender, RoutedEventArgs e)
@@ -80,9 +107,18 @@ namespace KolegoveDBS
 
         private void SignOut_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.login = 0;
-            MainWindow.userId = 0;
-            LoginLB.Content = login;
+            login = 0;
+            userId = 0;
+            Initialize();
+        }
+
+        private void Profile_Click(object sender, RoutedEventArgs e)
+        {
+            Profile win = new Profile(userId);
+            win.Top = this.Top;
+            win.Left = this.Left;
+            win.Show();
+            this.Close();
         }
     }
 }

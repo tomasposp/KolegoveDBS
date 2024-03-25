@@ -58,7 +58,7 @@ namespace KolegoveDBS
                     if (rowsAffected > 0)
                     {
                         MessageBox.Show("Záznam byl úspěšně vložen do databáze.");
-                        MainWindow win = new MainWindow();
+                        MainWindow win = new MainWindow(0,0);
                         win.Top = this.Top;
                         win.Left = this.Left;
                         win.Show();

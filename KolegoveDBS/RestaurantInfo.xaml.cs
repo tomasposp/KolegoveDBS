@@ -35,18 +35,27 @@ namespace KolegoveDBS
             using (MySqlConnection con = new MySqlConnection(constring))
             {
                 con.Open();
-                string query = "SELECT * FROM restaurant WHERE restaurant_id = @selectedId";
+                string query = "SELECT r.*, m.* FROM restaurant r LEFT JOIN menu m ON r.restaurant_id = m.restaurant_id WHERE r.restaurant_id = @selectedId";
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@selectedId", selectedId);
                     MySqlDataReader reader = cmd.ExecuteReader();
 
+                    string items = "";
+                    string prices = "";
                     while (reader.Read())
                     {
                         string restaurantName = reader.GetString(1);
                         Name.Content = restaurantName;
                         string address = reader.GetString(2);
                         Address.Content = address;
+                        string menu = reader.GetString(5);
+                        items += menu + "\n";
+                        Menu.Content = items;
+
+                        decimal price = reader.GetDecimal(6);
+                        prices += price + "\n";
+                        Price.Content = prices;
                     }
                 }
             }

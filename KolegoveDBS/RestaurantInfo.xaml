@@ -9,6 +9,9 @@
     <Grid>
         <Label Name="Name" Content="" HorizontalAlignment="Left" Margin="105,123,0,0" VerticalAlignment="Top"/>
         <Label Name="Address" Content="" HorizontalAlignment="Left" Margin="105,191,0,0" VerticalAlignment="Top"/>
+        <Label Name="Menu" Content="" HorizontalAlignment="Left" Margin="105,238,0,0" VerticalAlignment="Top"/>
+        <Label Name="Price" Content="" HorizontalAlignment="Left" Margin="325,238,0,0" VerticalAlignment="Top"/>
+        <Label Name="Rating" Content="" HorizontalAlignment="Left" Margin="570,69,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

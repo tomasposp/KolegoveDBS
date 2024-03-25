@@ -51,14 +51,12 @@ namespace KolegoveDBS
                             int count = reader.GetInt32(0);
                             if (count > 0)
                             {
-                                MainWindow.userId = reader.GetInt32(1);
                                 MessageBox.Show("Přihlášení úspěšné!");
-                                MainWindow win = new MainWindow();
+                                MainWindow win = new MainWindow(1, reader.GetInt32(1));
                                 win.Top = this.Top;
                                 win.Left = this.Left;
                                 win.Show();
                                 this.Close();
-                                MainWindow.login = 1;
                             }
                             else
                             {

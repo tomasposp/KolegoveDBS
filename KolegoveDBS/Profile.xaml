@@ -7,6 +7,11 @@
         mc:Ignorable="d"
         Title="Profile" Height="450" Width="800">
     <Grid>
-        
+        <Label Name="Name" Content="" HorizontalAlignment="Left" Margin="355,89,0,0" VerticalAlignment="Top"/>
+        <Label Name="Email" Content="" HorizontalAlignment="Left" Margin="355,139,0,0" VerticalAlignment="Top"/>
+        <Label Name="Phone" Content="" HorizontalAlignment="Left" Margin="355,191,0,0" VerticalAlignment="Top"/>
+        <Label Name="Address" Content="" HorizontalAlignment="Left" Margin="355,233,0,0" VerticalAlignment="Top"/>
+        <Button Name="Back" Content="Zpět na hlavní nabídku" HorizontalAlignment="Left" Margin="645,29,0,0" VerticalAlignment="Top" Click="Back_Click"/>
+
     </Grid>
 </Window>
