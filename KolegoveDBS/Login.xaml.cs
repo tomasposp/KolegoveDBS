@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.PortableExecutable;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -27,6 +28,19 @@ namespace KolegoveDBS
         {
             InitializeComponent();
         }
+        private string ToSha256(string s)
+        {
+            using var sha256 = SHA256.Create();
+            byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(s));
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                sb.Append(bytes[i].ToString("x2"));
+            }
+            return sb.ToString();
+
+        }
 
         private void LoginBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -43,7 +57,7 @@ namespace KolegoveDBS
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@Email", EmailTB.Text);
-                    cmd.Parameters.AddWithValue("@Password", PasswordTB.Text);
+                    cmd.Parameters.AddWithValue("@Password", ToSha256(PasswordTB.Text));
                     using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
@@ -52,7 +66,7 @@ namespace KolegoveDBS
                             if (count > 0)
                             {
                                 MessageBox.Show("Přihlášení úspěšné!");
-                                MainWindow win = new MainWindow(1, reader.GetInt32(1),0,0);
+                                MainWindow win = new MainWindow(1, reader.GetInt32(1), 0, 0);
                                 win.Top = this.Top;
                                 win.Left = this.Left;
                                 win.Show();
@@ -60,7 +74,8 @@ namespace KolegoveDBS
                             }
                             else
                             {
-                                //MessageBox.Show("Neplatné přihlašovací údaje. Zkuste to znovu.");
+
+                                MessageBox.Show("Neplatné přihlašovací údaje. Zkuste to znovu.");
                             }
                         }
                     }
@@ -74,7 +89,7 @@ namespace KolegoveDBS
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@Email", EmailTB.Text);
-                    cmd.Parameters.AddWithValue("@Password", PasswordTB.Text);
+                    cmd.Parameters.AddWithValue("@Password", ToSha256(PasswordTB.Text));
                     using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
@@ -83,7 +98,7 @@ namespace KolegoveDBS
                             if (count > 0)
                             {
                                 MessageBox.Show("Přihlášení úspěšné!");
-                                MainWindow win = new MainWindow(1, reader.GetInt32(1),1,0);
+                                MainWindow win = new MainWindow(1, reader.GetInt32(1), 1, 0);
                                 win.Top = this.Top;
                                 win.Left = this.Left;
                                 win.Show();
@@ -105,7 +120,7 @@ namespace KolegoveDBS
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@Email", EmailTB.Text);
-                    cmd.Parameters.AddWithValue("@Password", PasswordTB.Text);
+                    cmd.Parameters.AddWithValue("@Password", ToSha256(PasswordTB.Text));
                     using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
@@ -114,7 +129,7 @@ namespace KolegoveDBS
                             if (count > 0)
                             {
                                 MessageBox.Show("Přihlášení úspěšné!");
-                                MainWindow win = new MainWindow(1, reader.GetInt32(1),0,1);
+                                MainWindow win = new MainWindow(1, reader.GetInt32(1), 0, 1);
                                 win.Top = this.Top;
                                 win.Left = this.Left;
                                 win.Show();

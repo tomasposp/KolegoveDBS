@@ -12,7 +12,16 @@
         <StackPanel x:Name="MenuStackPanel" Margin="105,238,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
         </StackPanel>
         <Label Name="Rating" Content="" HorizontalAlignment="Left" Margin="570,69,0,0" VerticalAlignment="Top"/>
-        <Button Content="Order" HorizontalAlignment="Left" Margin="575,359,0,0" VerticalAlignment="Top" Click="Button_Click"/>
+        <Button Name="orderBtn" Content="Order" HorizontalAlignment="Left" Margin="601,342,0,0" VerticalAlignment="Top" Click="Button_Click" Height="35" Width="77" FontSize="20"/>
         <Image Name="RestaurantImage" HorizontalAlignment="Left" Height="205" Margin="515,44,0,0" VerticalAlignment="Top" Width="215"/>
+        <ComboBox x:Name="PaymentMethod"  HorizontalAlignment="Left" Height="27" Margin="205,301,0,0" VerticalAlignment="Top" Width="197" SelectionChanged="ComboBox_SelectionChanged">
+            <ComboBoxItem Content="Cash"/>
+            <ComboBoxItem Content="Card"/>
+        </ComboBox>
+        <Label Content="Payment Method" HorizontalAlignment="Left" Margin="73,300,0,0" VerticalAlignment="Top" Width="124" FontSize="15"/>
+        <Label Content="Tip amount" HorizontalAlignment="Left" Margin="73,342,0,0" VerticalAlignment="Top" Width="100" FontSize="15"/>
+        <TextBox x:Name="Tip" HorizontalAlignment="Left" Height="30" Margin="205,342,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="99" FontSize="15" Text="0.00"/>
+
+
     </Grid>
 </Window>

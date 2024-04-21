@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq.Expressions;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,13 +16,26 @@ namespace KolegoveDBS
         private int selectedId;
         public int login = 0;
         public int userId;
+        public string payment_method;
+        public decimal tip;
 
-        public RestaurantInfo(int id, int userId)
+        public RestaurantInfo(int id, int userId, int login)
         {
             InitializeComponent();
             this.selectedId = id;
             this.userId = userId;
+            this.login = login;
             LoadRestaurantInfo();
+
+            if (login == 0)
+            {
+                orderBtn.Visibility = Visibility.Hidden;
+
+            }
+            if (login == 1)
+            {
+                orderBtn.Visibility = Visibility.Visible;
+            }
         }
 
         private void LoadRestaurantInfo()
@@ -67,8 +81,8 @@ namespace KolegoveDBS
 
                         StackPanel menuPanel = new StackPanel();
 
-                        string menu = reader.GetString(5);
-                        decimal price = reader.GetDecimal(6);
+                        string menu = reader.GetString(6);
+                        decimal price = reader.GetDecimal(7);
 
                         string[] menuItems = menu.Split('\n');
                         foreach (string menuItem in menuItems)
@@ -88,8 +102,30 @@ namespace KolegoveDBS
         {
             try
             {
+
+
                 decimal totalPrice = 0;
                 List<string> selectedItems = new List<string>();
+
+                if (PaymentMethod.Text != "")
+                {
+                    payment_method = PaymentMethod.Text;
+                }
+                else
+                {
+                    MessageBox.Show("Prosím vyplňte metodu platby");
+                }
+                if (Tip.Text != "")
+                {
+
+                    tip = Convert.ToDecimal(Tip.Text);
+
+                }
+                else
+                {
+                    MessageBox.Show("Prosím vyplňte tuzér");
+
+                }
 
                 foreach (UIElement element in MenuStackPanel.Children)
                 {
@@ -108,6 +144,11 @@ namespace KolegoveDBS
                             }
                         }
                     }
+                }
+                if (selectedItems.Count == 0)
+                {
+                    MessageBox.Show("Musíte vyplnit");
+                    return;
                 }
 
                 var orderObject = new
@@ -128,6 +169,7 @@ namespace KolegoveDBS
         private void AddJsonToDatabase(string jsonMenu, decimal totalPrice, int login, int userId)
         {
             int orderId;
+            decimal totalAmount;
 
             string server = "localhost";
             string database = "kolegovedb";
@@ -138,12 +180,13 @@ namespace KolegoveDBS
             using (MySqlConnection con = new MySqlConnection(constring))
             {
                 con.Open();
-                string insertOrderQuery = "INSERT INTO orders (restaurant_id, order_list, amount) VALUES (@restaurantId, @jsonMenu, @amount)";
+                string insertOrderQuery = "INSERT INTO orders (restaurant_id, order_list, amount, delivery_fee) VALUES (@restaurantId, @jsonMenu, @amount, @delivery_fee)";
                 using (MySqlCommand cmd = new MySqlCommand(insertOrderQuery, con))
                 {
                     cmd.Parameters.AddWithValue("@restaurantId", selectedId);
                     cmd.Parameters.AddWithValue("@jsonMenu", jsonMenu);
                     cmd.Parameters.AddWithValue("@amount", totalPrice);
+                    cmd.Parameters.AddWithValue("@delivery_fee", 2.00);
                     cmd.ExecuteNonQuery();
 
                     orderId = (int)cmd.LastInsertedId;
@@ -156,8 +199,47 @@ namespace KolegoveDBS
                     cmd.Parameters.AddWithValue("@orderId", orderId);
                     cmd.ExecuteNonQuery();
                 }
+
+                string calculateTotalAmountQuery = "Select CalculateTotalAmount(@orderId)";
+                using (MySqlCommand cmd = new MySqlCommand(calculateTotalAmountQuery, con))
+                {
+                    cmd.Parameters.AddWithValue("orderId", orderId);
+                    totalAmount = Convert.ToDecimal(cmd.ExecuteScalar());
+
+                }
+
+
+                string insertPaymentQuery = "INSERT INTO payment values (@order_id, @payment_method, @payment_date, @total_amount, @payment_status, @tip)";
+                using (MySqlCommand cmd = new MySqlCommand(insertPaymentQuery, con))
+                {
+                    cmd.Parameters.AddWithValue("@order_id", orderId);
+                    cmd.Parameters.AddWithValue("@payment_method", payment_method);
+                    cmd.Parameters.AddWithValue("@payment_date", DateTime.Now.ToString());
+                    cmd.Parameters.AddWithValue("@total_amount", totalAmount + tip);
+                    cmd.Parameters.AddWithValue("@payment_status", "pending");
+                    cmd.Parameters.AddWithValue("@tip", tip);
+                    cmd.ExecuteNonQuery();
+
+                }
+
             }
+
+
         }
-        
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+
+        private void Tip_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+
+        {
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using MySql.Data.MySqlClient;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
+using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -51,6 +52,8 @@ namespace KolegoveDBS
                 AdminLbl.Visibility = Visibility.Hidden;
                 CourierLbl.Visibility = Visibility.Hidden;
                 CourierProfile.Visibility = Visibility.Hidden;
+                stackPanelButtons.Visibility = Visibility.Visible;
+                stackPanelCouriers.Visibility = Visibility.Hidden;
             }
             if (login == 1)
             {
@@ -60,6 +63,7 @@ namespace KolegoveDBS
                 Profile.Visibility = Visibility.Visible;
                 AdminLbl.Visibility = Visibility.Hidden;
                 CourierLbl.Visibility = Visibility.Hidden;
+                stackPanelCouriers.Visibility = Visibility.Hidden;
                 if (admin == 1)
                 {
                     AdminLbl.Visibility = Visibility.Visible;
@@ -69,6 +73,16 @@ namespace KolegoveDBS
                     CourierLbl.Visibility = Visibility.Visible;
                     Profile.Visibility = Visibility.Hidden;
                     CourierProfile.Visibility = Visibility.Visible;
+                    stackPanelButtons.Visibility = Visibility.Hidden;
+                    stackPanelCouriers.Visibility = Visibility.Visible;
+                    InitializeCourier();
+                }
+                if (courier == 0)
+                {
+                    CourierProfile.Visibility = Visibility.Hidden;
+                    Profile.Visibility = Visibility.Visible;
+                    stackPanelButtons.Visibility = Visibility.Visible;
+                    stackPanelCouriers.Visibility = Visibility.Hidden;
                 }
 
             }
@@ -99,11 +113,54 @@ namespace KolegoveDBS
                     }
                 }
             }
+
         }
+
+        private void InitializeCourier()
+        {
+            StringBuilder bu = new StringBuilder();
+            string server = "localhost";
+            string database = "kolegovedb";
+            string uid = "root";
+            string password = "admin";
+            string constring = "Server=" + server + "; database=" + database + "; uid=" + uid + "; pwd=" + password;
+
+            using (MySqlConnection con = new MySqlConnection(constring))
+            {
+                con.Open();
+                string query = "SELECT o.*, r.* FROM orders o LEFT JOIN restaurant r ON o.restaurant_id = r.restaurant_id WHERE o.courier_id IS NULL";
+
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
+                {
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        string restaurant = reader.GetString(7);
+                        string address = reader.GetString(8);
+                        decimal amount = reader.GetDecimal(1);
+                        int orderId = reader.GetInt32(0);
+                        Button btn = new Button();
+                        btn.Content = "Restaurace: " + restaurant+ ", Adresa: " + address+ ", cena: " + amount;
+                        btn.Tag = orderId;
+                        btn.Click += DeliveryInfo_Click;
+                        stackPanelCouriers.Children.Add(btn);
+                    }
+                }
+            }
+        }
+
+        private void DeliveryInfo_Click(object sender, RoutedEventArgs e)
+        {
+            int orderId = (int)((Button)sender).Tag;
+            DeliveryInfo win = new DeliveryInfo(orderId, userId, login);
+            win.Show();
+        }
+
         private void RestaurantInfo_Click(object sender, RoutedEventArgs e)
         {
             int restaurantId = (int)((Button)sender).Tag;
-            RestaurantInfo win = new RestaurantInfo(restaurantId, userId);
+            RestaurantInfo win = new RestaurantInfo(restaurantId, userId, login);
             win.Show();
         }
 

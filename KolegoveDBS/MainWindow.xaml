@@ -14,6 +14,9 @@
         <StackPanel Name="stackPanelButtons" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="75,177,0,0" Height="139" Width="635">
 
         </StackPanel>
+        <StackPanel Name="stackPanelCouriers" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="75,177,0,0" Height="139" Width="635">
+
+        </StackPanel>
         <Button Name="SignOut" Content="SignOut" HorizontalAlignment="Left" Margin="392,94,0,0" VerticalAlignment="Top" Click="SignOut_Click"/>
         <Button Name="Profile" Content="Profile" HorizontalAlignment="Left" Margin="732,0,0,0" VerticalAlignment="Top" Click="Profile_Click" />
         <Button Name="CourierProfile" Content="Profile" HorizontalAlignment="Left" Margin="732,0,0,0" VerticalAlignment="Top" Click="CourierProfile_Click"/>
