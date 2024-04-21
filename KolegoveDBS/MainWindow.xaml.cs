@@ -22,15 +22,19 @@ namespace KolegoveDBS
     {
         public int login = 0;
         public int userId;
+        public int admin;
+        public int courier;
         public MainWindow() {
             InitializeComponent();
 
             Initialize();
         }
-        public MainWindow(int login, int userId)
+        public MainWindow(int login, int userId, int admin, int courier)
         {
             this.login = login;
             this.userId = userId;
+            this.admin = admin;
+            this.courier = courier;
             InitializeComponent();
 
             Initialize();
@@ -44,6 +48,9 @@ namespace KolegoveDBS
                 Login.Visibility = Visibility.Visible;
                 Register.Visibility = Visibility.Visible;
                 Profile.Visibility = Visibility.Hidden;
+                AdminLbl.Visibility = Visibility.Hidden;
+                CourierLbl.Visibility = Visibility.Hidden;
+                CourierProfile.Visibility = Visibility.Hidden;
             }
             if (login == 1)
             {
@@ -51,6 +58,19 @@ namespace KolegoveDBS
                 Login.Visibility = Visibility.Hidden;
                 Register.Visibility = Visibility.Hidden;
                 Profile.Visibility = Visibility.Visible;
+                AdminLbl.Visibility = Visibility.Hidden;
+                CourierLbl.Visibility = Visibility.Hidden;
+                if (admin == 1)
+                {
+                    AdminLbl.Visibility = Visibility.Visible;
+                }
+                if (courier == 1)
+                {
+                    CourierLbl.Visibility = Visibility.Visible;
+                    Profile.Visibility = Visibility.Hidden;
+                    CourierProfile.Visibility = Visibility.Visible;
+                }
+
             }
             stackPanelButtons.Children.Clear();
 
@@ -83,7 +103,7 @@ namespace KolegoveDBS
         private void RestaurantInfo_Click(object sender, RoutedEventArgs e)
         {
             int restaurantId = (int)((Button)sender).Tag;
-            RestaurantInfo win = new RestaurantInfo(restaurantId);
+            RestaurantInfo win = new RestaurantInfo(restaurantId, userId);
             win.Show();
         }
 
@@ -115,6 +135,15 @@ namespace KolegoveDBS
         private void Profile_Click(object sender, RoutedEventArgs e)
         {
             Profile win = new Profile(userId);
+            win.Top = this.Top;
+            win.Left = this.Left;
+            win.Show();
+            this.Close();
+        }
+
+        private void CourierProfile_Click(object sender, RoutedEventArgs e)
+        {
+            CourierProfile win = new CourierProfile(userId);
             win.Top = this.Top;
             win.Left = this.Left;
             win.Show();

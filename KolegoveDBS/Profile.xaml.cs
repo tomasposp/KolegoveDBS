@@ -1,71 +1,112 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using MySql.Data.MySqlClient;
+using System.Data;
+using System.Text.RegularExpressions;
+using System.Windows.Controls.Primitives;
 
 namespace KolegoveDBS
 {
-    /// <summary>
-    /// Interakční logika pro Profile.xaml
-    /// </summary>
     public partial class Profile : Window
     {
         private int customerId;
+
         public Profile(int customerId)
         {
-
             InitializeComponent();
             this.customerId = customerId;
+            LoadCustomerInfo();
+        }
 
-            StringBuilder bu = new StringBuilder();
+        private async void LoadCustomerInfo()
+        {
             string server = "localhost";
             string database = "kolegovedb";
             string uid = "root";
             string password = "admin";
-            string constring = "Server=" + server + "; database=" + database + "; uid=" + uid + "; pwd=" + password;
-            using (MySqlConnection con = new MySqlConnection(constring))
-            {
-                con.Open();
-                string query = "SELECT * FROM customer WHERE customer_id = @customerId";
-                using (MySqlCommand cmd = new MySqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@customerId", customerId);
-                    MySqlDataReader reader = cmd.ExecuteReader();
+            string constring = $"Server={server}; database={database}; uid={uid}; pwd={password}";
 
-                    if (reader.Read())
+            try
+            {
+                using (MySqlConnection con = new MySqlConnection(constring))
+                {
+                    await con.OpenAsync();
+                    string query = "SELECT c.name, c.email, c.phone, c.address, (SELECT IFNULL(SUM(o.amount), 0) FROM orders o WHERE co.order_id = o.order_id) AS total_amount, GROUP_CONCAT(o.order_list) AS orders FROM customer c LEFT JOIN customer_orders co ON c.customer_id = co.customer_id LEFT JOIN orders o ON co.order_id = o.order_id WHERE c.customer_id = @customerId GROUP BY c.name, c.email, c.phone, c.address, co.order_id; ";
+
+                    using (MySqlCommand cmd = new MySqlCommand(query, con))
                     {
-                        string name = reader.GetString(1);
-                        Name.Content = name;
-                        string email = reader.GetString(2);
-                        Email.Content = email;
-                        string phone= reader.GetString(3);
-                        Phone.Content = phone;
-                        string address = reader.GetString(4);
-                        Address.Content = address;
+                        cmd.Parameters.AddWithValue("@customerId", customerId);
+
+                        using (MySqlDataReader reader = (MySqlDataReader)await cmd.ExecuteReaderAsync())
+                        {
+                            if (reader.HasRows)
+                            {
+                                while (await reader.ReadAsync())
+                                {
+                                    string name = reader.GetString("name");
+                                    Name.Content = name;
+
+                                    string email = reader.GetString("email");
+                                    Email.Content = email;
+
+                                    string phone = reader.GetString("phone");
+                                    Phone.Content = phone;
+
+                                    string address = reader.GetString("address");
+                                    Address.Content = address;
+
+                                    decimal amount = reader.GetDecimal("total_amount");
+
+                                    string orderListJson = reader.IsDBNull("orders") ? "" : reader.GetString("orders").Trim();
+
+                                    if (!string.IsNullOrEmpty(orderListJson))
+                                    {
+                                        List<OrderResponse> orderResponseList = JsonConvert.DeserializeObject<List<OrderResponse>>("[" + orderListJson + "]");
+
+                                        foreach (OrderResponse orderResponse in orderResponseList)
+                                        {
+                                            OrderList.Content += $"Cena: {amount}                                                         ";
+
+                                            StringBuilder orderBuilder = new StringBuilder();
+                                            foreach (string order in orderResponse.Orders)
+                                            {
+                                                orderBuilder.Append(order + ", ");
+                                            }
+                                            OrderList.Content += orderBuilder.ToString().TrimEnd(',', ' ') + Environment.NewLine;
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                OrderList.Content = "";
+                            }
+                        }
                     }
                 }
             }
-
+            catch (Exception ex)
+            {
+                MessageBox.Show("Chyba při načítání informací o zákazníkovi: " + ex.Message, "Chyba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow win = new MainWindow(1, customerId);
+            MainWindow win = new MainWindow(1, customerId,0,0);
             win.Top = this.Top;
             win.Left = this.Left;
             win.Show();
             this.Close();
+        }
+
+        public class OrderResponse
+        {
+            public List<string> Orders { get; set; }
         }
     }
 }

@@ -16,5 +16,8 @@
         </StackPanel>
         <Button Name="SignOut" Content="SignOut" HorizontalAlignment="Left" Margin="392,94,0,0" VerticalAlignment="Top" Click="SignOut_Click"/>
         <Button Name="Profile" Content="Profile" HorizontalAlignment="Left" Margin="732,0,0,0" VerticalAlignment="Top" Click="Profile_Click" />
+        <Button Name="CourierProfile" Content="Profile" HorizontalAlignment="Left" Margin="732,0,0,0" VerticalAlignment="Top" Click="CourierProfile_Click"/>
+        <Label Name="AdminLbl" Content="Admin" HorizontalAlignment="Left" Margin="282,20,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
+        <Label Name="CourierLbl" Content="Courier" HorizontalAlignment="Left" Margin="282,20,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
     </Grid>
 </Window>

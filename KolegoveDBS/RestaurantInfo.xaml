@@ -9,9 +9,10 @@
     <Grid>
         <Label Name="Name" Content="" HorizontalAlignment="Left" Margin="105,123,0,0" VerticalAlignment="Top"/>
         <Label Name="Address" Content="" HorizontalAlignment="Left" Margin="105,191,0,0" VerticalAlignment="Top"/>
-        <Label Name="Menu" Content="" HorizontalAlignment="Left" Margin="105,238,0,0" VerticalAlignment="Top"/>
-        <Label Name="Price" Content="" HorizontalAlignment="Left" Margin="325,238,0,0" VerticalAlignment="Top"/>
+        <StackPanel x:Name="MenuStackPanel" Margin="105,238,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+        </StackPanel>
         <Label Name="Rating" Content="" HorizontalAlignment="Left" Margin="570,69,0,0" VerticalAlignment="Top"/>
-
+        <Button Content="Order" HorizontalAlignment="Left" Margin="575,359,0,0" VerticalAlignment="Top" Click="Button_Click"/>
+        <Image Name="RestaurantImage" HorizontalAlignment="Left" Height="205" Margin="515,44,0,0" VerticalAlignment="Top" Width="215"/>
     </Grid>
 </Window>

@@ -52,7 +52,7 @@ namespace KolegoveDBS
                             if (count > 0)
                             {
                                 MessageBox.Show("Přihlášení úspěšné!");
-                                MainWindow win = new MainWindow(1, reader.GetInt32(1));
+                                MainWindow win = new MainWindow(1, reader.GetInt32(1),0,0);
                                 win.Top = this.Top;
                                 win.Left = this.Left;
                                 win.Show();
@@ -60,13 +60,75 @@ namespace KolegoveDBS
                             }
                             else
                             {
-                                MessageBox.Show("Neplatné přihlašovací údaje. Zkuste to znovu.");
+                                //MessageBox.Show("Neplatné přihlašovací údaje. Zkuste to znovu.");
                             }
                         }
                     }
                 }
             }
-       
+
+            using (MySqlConnection con = new MySqlConnection(constring))
+            {
+                con.Open();
+                string query = "SELECT COUNT(*), MAX(admin_id) FROM administrator WHERE email = @Email AND password = @Password";
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@Email", EmailTB.Text);
+                    cmd.Parameters.AddWithValue("@Password", PasswordTB.Text);
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            int count = reader.GetInt32(0);
+                            if (count > 0)
+                            {
+                                MessageBox.Show("Přihlášení úspěšné!");
+                                MainWindow win = new MainWindow(1, reader.GetInt32(1),1,0);
+                                win.Top = this.Top;
+                                win.Left = this.Left;
+                                win.Show();
+                                this.Close();
+                            }
+                            else
+                            {
+                                //MessageBox.Show("Neplatné přihlašovací údaje. Zkuste to znovu.");
+                            }
+                        }
+                    }
+                }
+            }
+
+            using (MySqlConnection con = new MySqlConnection(constring))
+            {
+                con.Open();
+                string query = "SELECT COUNT(*), MAX(courier_id) FROM courier WHERE email = @Email AND password = @Password";
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@Email", EmailTB.Text);
+                    cmd.Parameters.AddWithValue("@Password", PasswordTB.Text);
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            int count = reader.GetInt32(0);
+                            if (count > 0)
+                            {
+                                MessageBox.Show("Přihlášení úspěšné!");
+                                MainWindow win = new MainWindow(1, reader.GetInt32(1),0,1);
+                                win.Top = this.Top;
+                                win.Left = this.Left;
+                                win.Show();
+                                this.Close();
+                            }
+                            else
+                            {
+                                //MessageBox.Show("Neplatné přihlašovací údaje. Zkuste to znovu.");
+                            }
+                        }
+                    }
+                }
+            }
+
         }
     }
 }
