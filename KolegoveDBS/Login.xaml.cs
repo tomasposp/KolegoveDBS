@@ -69,7 +69,7 @@ namespace KolegoveDBS
                     using (MySqlCommand cmd = new MySqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@username", EmailTB.Text);
-                        cmd.Parameters.AddWithValue("@password", ToSha256(PasswordTB.Text));
+                        cmd.Parameters.AddWithValue("@password", ToSha256(PasswordTB.Password));
                         using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())

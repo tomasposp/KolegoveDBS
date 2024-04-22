@@ -1,0 +1,24 @@
+﻿<Window x:Class="KolegoveDBS.PaymentChoiceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:KolegoveDBS"
+        mc:Ignorable="d"
+        Title="PaymentChoiceWindow" Height="217" Width="340">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Text="Chcete zaplatit teď nebo později?" HorizontalAlignment="Center" VerticalAlignment="Center" Height="22" Width="233" FontSize="15px" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,94,0,10" Width="188">
+            <Button Content="Zaplatit teď" Click="PayNow_Click" Margin="5" Height="32" Width="69" />
+            <Button Content="Zaplatit později" Click="PayLater_Click" Margin="5" Height="33" Width="92" />
+        </StackPanel>
+        <TextBlock FontSize="15px" HorizontalAlignment="Left" Height="22" Margin="53,38,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="117"><Run Language="cs-cz" Text="Vaše platba bude"/></TextBlock>
+        <TextBlock FontSize="15px" x:Name="Total"  Text=" " HorizontalAlignment="Left" Height="22" Margin="181,38,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="41"/>
+        <Label Content="€" HorizontalAlignment="Left" Height="30" Margin="227,34,0,0" VerticalAlignment="Top" Width="31"/>
+
+    </Grid>
+</Window>

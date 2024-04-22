@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq.Expressions;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
 namespace KolegoveDBS
@@ -26,7 +28,6 @@ namespace KolegoveDBS
             this.userId = userId;
             this.login = login;
             LoadRestaurantInfo();
-
             if (login == 0)
             {
                 orderBtn.Visibility = Visibility.Hidden;
@@ -37,9 +38,16 @@ namespace KolegoveDBS
                 orderBtn.Visibility = Visibility.Visible;
             }
         }
+        private void PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
+        }
 
         private void LoadRestaurantInfo()
         {
+
+
             StringBuilder bu = new StringBuilder();
             string server = "localhost";
             string database = "kolegovedb";
@@ -50,7 +58,7 @@ namespace KolegoveDBS
             using (MySqlConnection con = new MySqlConnection(constring))
             {
                 con.Open();
-                string query = "SELECT r.*, m.*, rp.picture FROM restaurant r LEFT JOIN menu m ON r.restaurant_id = m.restaurant_id LEFT JOIN restaurant_picture rp ON r.restaurant_id = rp.restaurant_id WHERE r.restaurant_id = @selectedId";
+                string query = "SELECT r.*, m.* FROM restaurant r LEFT JOIN menu m ON r.restaurant_id = m.restaurant_id WHERE r.restaurant_id = @selectedId";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -59,10 +67,22 @@ namespace KolegoveDBS
 
                     while (reader.Read())
                     {
+                        decimal rating;
                         string restaurantName = reader.GetString(1);
                         Name.Content = restaurantName;
                         string address = reader.GetString(2);
                         Address.Content = address;
+                        if (!reader.IsDBNull(4))
+                        {
+                            rating = reader.GetDecimal(4);
+                        }
+                        else
+                        {
+                            rating = 0;
+                        }
+
+                        Rating.Content = rating.ToString();
+
 
                         byte[] imageBytes = (byte[])reader["picture"];
                         if (imageBytes != null && imageBytes.Length > 0)
@@ -81,8 +101,8 @@ namespace KolegoveDBS
 
                         StackPanel menuPanel = new StackPanel();
 
-                        string menu = reader.GetString(6);
-                        decimal price = reader.GetDecimal(7);
+                        string menu = reader.GetString(7);
+                        decimal price = reader.GetDecimal(8);
 
                         string[] menuItems = menu.Split('\n');
                         foreach (string menuItem in menuItems)
@@ -100,9 +120,11 @@ namespace KolegoveDBS
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+
+
+
             try
             {
-
 
                 decimal totalPrice = 0;
                 List<string> selectedItems = new List<string>();
@@ -114,6 +136,7 @@ namespace KolegoveDBS
                 else
                 {
                     MessageBox.Show("Prosím vyplňte metodu platby");
+                    return;
                 }
                 if (Tip.Text != "")
                 {
@@ -124,6 +147,7 @@ namespace KolegoveDBS
                 else
                 {
                     MessageBox.Show("Prosím vyplňte tuzér");
+                    return;
 
                 }
 
@@ -147,7 +171,6 @@ namespace KolegoveDBS
                 }
                 if (selectedItems.Count == 0)
                 {
-                    MessageBox.Show("Musíte vyplnit");
                     return;
                 }
 
@@ -158,18 +181,33 @@ namespace KolegoveDBS
 
                 string jsonMenu = JsonConvert.SerializeObject(orderObject);
 
+
                 AddJsonToDatabase(jsonMenu, totalPrice, login, userId);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Chyba: " + ex.Message);
             }
+
         }
 
         private void AddJsonToDatabase(string jsonMenu, decimal totalPrice, int login, int userId)
         {
+            PaymentChoiceWindow paymentWindow = new PaymentChoiceWindow(Convert.ToDecimal(totalPrice + tip + 2));
+            paymentWindow.ShowDialog();
             int orderId;
             decimal totalAmount;
+            string status = "";
+            if (paymentWindow.paid)
+            {
+                status = "paid";
+            }
+            else
+            {
+                status = "pending";
+            }
+
+
 
             string server = "localhost";
             string database = "kolegovedb";
@@ -199,31 +237,37 @@ namespace KolegoveDBS
                     cmd.Parameters.AddWithValue("@orderId", orderId);
                     cmd.ExecuteNonQuery();
                 }
-
-                string calculateTotalAmountQuery = "Select CalculateTotalAmount(@orderId)";
+                string calculateTotalAmountQuery = "Select CalculateTotalAmount(@order_id)";
                 using (MySqlCommand cmd = new MySqlCommand(calculateTotalAmountQuery, con))
                 {
-                    cmd.Parameters.AddWithValue("orderId", orderId);
+                    cmd.Parameters.AddWithValue("@order_id", orderId);
                     totalAmount = Convert.ToDecimal(cmd.ExecuteScalar());
 
                 }
 
 
-                string insertPaymentQuery = "INSERT INTO payment values (@payment_id, @order_id, @payment_method, @payment_date, @total_amount, @payment_status, @tip)";
+                string insertPaymentQuery = "INSERT INTO payment values (@payment_id,@order_id, @payment_method, @payment_date, @total_amount, @payment_status, @tip)";
                 using (MySqlCommand cmd = new MySqlCommand(insertPaymentQuery, con))
                 {
                     cmd.Parameters.AddWithValue("@payment_id", cmd.LastInsertedId);
                     cmd.Parameters.AddWithValue("@order_id", orderId);
                     cmd.Parameters.AddWithValue("@payment_method", payment_method);
-                    cmd.Parameters.AddWithValue("@payment_date", DateTime.Now.ToString());
+                    if (status == "paid")
+                    {
+                        cmd.Parameters.AddWithValue("@payment_date", DateTime.Now.ToString());
+                    }
+                    else if (status == "pending")
+                    {
+                        cmd.Parameters.AddWithValue("@payment_date", null);
+                    }
                     cmd.Parameters.AddWithValue("@total_amount", totalAmount + tip);
-                    cmd.Parameters.AddWithValue("@payment_status", "pending");
+                    cmd.Parameters.AddWithValue("@payment_status", status);
                     cmd.Parameters.AddWithValue("@tip", tip);
                     cmd.ExecuteNonQuery();
-
                 }
 
             }
+            Close();
 
 
         }

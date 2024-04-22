@@ -1,6 +1,7 @@
 ﻿using MySql.Data.MySqlClient;
 using System.Text;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace KolegoveDBS
 {
@@ -9,6 +10,7 @@ namespace KolegoveDBS
         private int selectedId;
         public int login = 0;
         public int userId;
+
 
         public DeliveryInfo(int id, int userId, int login)
         {
@@ -81,7 +83,7 @@ namespace KolegoveDBS
                     if (rowsAffected > 0)
                     {
                         MessageBox.Show("Delivery ID updated successfully.");
-                        
+
                     }
                     else
                     {
@@ -89,6 +91,8 @@ namespace KolegoveDBS
                     }
                 }
             }
+            this.Close();
         }
+
     }
 }

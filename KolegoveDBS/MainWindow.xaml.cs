@@ -25,7 +25,8 @@ namespace KolegoveDBS
         public int userId;
         public int admin;
         public int courier;
-        public MainWindow() {
+        public MainWindow()
+        {
             InitializeComponent();
 
             Initialize();
@@ -42,9 +43,11 @@ namespace KolegoveDBS
 
         }
 
-        private void Initialize() {
+        private void Initialize()
+        {
             if (login == 0)
             {
+                RefreshBtn.Visibility = Visibility.Hidden;
                 SignOut.Visibility = Visibility.Hidden;
                 Login.Visibility = Visibility.Visible;
                 Register.Visibility = Visibility.Visible;
@@ -53,10 +56,12 @@ namespace KolegoveDBS
                 CourierLbl.Visibility = Visibility.Hidden;
                 CourierProfile.Visibility = Visibility.Hidden;
                 stackPanelButtons.Visibility = Visibility.Visible;
+                stackPanelDelete.Visibility = Visibility.Hidden;
                 stackPanelCouriers.Visibility = Visibility.Hidden;
             }
             if (login == 1)
             {
+                RefreshBtn.Visibility = Visibility.Hidden;
                 SignOut.Visibility = Visibility.Visible;
                 Login.Visibility = Visibility.Hidden;
                 Register.Visibility = Visibility.Hidden;
@@ -64,10 +69,6 @@ namespace KolegoveDBS
                 AdminLbl.Visibility = Visibility.Hidden;
                 CourierLbl.Visibility = Visibility.Hidden;
                 stackPanelCouriers.Visibility = Visibility.Hidden;
-                if (admin == 1)
-                {
-                    AdminLbl.Visibility = Visibility.Visible;
-                }
                 if (courier == 1)
                 {
                     CourierLbl.Visibility = Visibility.Visible;
@@ -75,14 +76,24 @@ namespace KolegoveDBS
                     CourierProfile.Visibility = Visibility.Visible;
                     stackPanelButtons.Visibility = Visibility.Hidden;
                     stackPanelCouriers.Visibility = Visibility.Visible;
+                    RefreshBtn.Visibility = Visibility.Visible;
                     InitializeCourier();
                 }
                 if (courier == 0)
                 {
+                    RefreshBtn.Visibility = Visibility.Hidden;
                     CourierProfile.Visibility = Visibility.Hidden;
                     Profile.Visibility = Visibility.Visible;
                     stackPanelButtons.Visibility = Visibility.Visible;
                     stackPanelCouriers.Visibility = Visibility.Hidden;
+                }
+                if (admin == 1)
+                {
+                    RefreshBtn.Visibility = Visibility.Visible;
+                    AdminLbl.Visibility = Visibility.Visible;
+                    stackPanelDelete.Visibility = Visibility.Visible;
+                    Profile.Visibility = Visibility.Hidden;
+                    CourierProfile.Visibility = Visibility.Hidden;
                 }
 
             }
@@ -110,9 +121,55 @@ namespace KolegoveDBS
                         btn.Tag = reader.GetInt32(0);
                         stackPanelButtons.Children.Add(btn);
                         btn.Click += RestaurantInfo_Click;
+                        if (admin == 1)
+                        {
+                            Button btnDel = new Button();
+
+                            btnDel.Tag = reader.GetInt32(0);
+                            btnDel.Content = "X";
+                            stackPanelDelete.Children.Add(btnDel);
+                            btnDel.Click += Delete_Click;
+
+                        }
+
                     }
                 }
             }
+
+        }
+        private void Delete_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Button deleteButton = sender as Button;
+                string server = "localhost";
+                string database = "kolegovedb";
+                string uid = "root";
+                string password = "admin";
+                string constring = "Server=" + server + "; database=" + database + "; uid=" + uid + "; pwd=" + password;
+                using (MySqlConnection con = new MySqlConnection(constring))
+                {
+                    con.Open();
+                    string deleteMenu = "Delete from menu where restaurant_id = @restaurantId";
+                    using (MySqlCommand cmd = new MySqlCommand(deleteMenu, con))
+                    {
+                        cmd.Parameters.AddWithValue("@restaurantId", deleteButton.Tag);
+                        cmd.ExecuteNonQuery();
+                    }
+                    string deleteQuery = "Delete from restaurant where restaurant_id = @restaurantId";
+                    using (MySqlCommand cmd = new MySqlCommand(deleteQuery, con))
+                    {
+                        cmd.Parameters.AddWithValue("@restaurantId", deleteButton.Tag);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                MessageBox.Show("Restaurace byla úspěšně smazaná!");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
 
         }
 
@@ -136,19 +193,23 @@ namespace KolegoveDBS
 
                     while (reader.Read())
                     {
-                        string restaurant = reader.GetString(7);
-                        string address = reader.GetString(8);
+                        string restaurant = reader.GetString(8);
+                        string address = reader.GetString(9);
                         decimal amount = reader.GetDecimal(1);
                         int orderId = reader.GetInt32(0);
                         Button btn = new Button();
-                        btn.Content = "Restaurace: " + restaurant+ ", Adresa: " + address+ ", cena: " + amount;
+                        btn.Content = "Restaurace: " + restaurant + ", Adresa: " + address + ", cena: " + amount;
                         btn.Tag = orderId;
                         btn.Click += DeliveryInfo_Click;
                         stackPanelCouriers.Children.Add(btn);
+
+
                     }
                 }
             }
         }
+
+
 
         private void DeliveryInfo_Click(object sender, RoutedEventArgs e)
         {
@@ -186,6 +247,7 @@ namespace KolegoveDBS
         {
             login = 0;
             userId = 0;
+            admin = 0;
             Initialize();
         }
 
@@ -205,6 +267,14 @@ namespace KolegoveDBS
             win.Left = this.Left;
             win.Show();
             this.Close();
+        }
+        private void Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            stackPanelCouriers.Children.Clear();
+            stackPanelButtons.Children.Clear();
+            stackPanelDelete.Children.Clear();
+            Initialize();
+            InitializeCourier();
         }
     }
 }

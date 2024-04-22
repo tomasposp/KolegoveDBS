@@ -7,9 +7,11 @@
         mc:Ignorable="d"
         Title="Login" Height="450" Width="800">
     <Grid>
-        <TextBox Name="EmailTB" HorizontalAlignment="Left" Margin="225,79,0,0" TextWrapping="Wrap" Text="pospa@seznam.cz" VerticalAlignment="Top" Width="120"/>
-        <TextBox Name="PasswordTB" HorizontalAlignment="Left" Margin="225,129,0,0" TextWrapping="Wrap" Text="admin" VerticalAlignment="Top" Width="120"/>
+        <TextBox Name="EmailTB" HorizontalAlignment="Left" Margin="225,79,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="230"/>
+        <PasswordBox Name="PasswordTB" HorizontalAlignment="Left" Margin="225,129,0,0" VerticalAlignment="Top" Width="230"/>
         <Button Name="LoginBtn" Content="Login" HorizontalAlignment="Left" Margin="245,239,0,0" VerticalAlignment="Top" Click="LoginBtn_Click"/>
         <Button Name="Back" Content="Zpět na hlavní nabídku" HorizontalAlignment="Left" Margin="635,29,0,0" VerticalAlignment="Top" Click="Back_Click"/>
+        <Label Name="LblEmail"  Content="Email" HorizontalAlignment="Left" Margin="152,75,0,0" VerticalAlignment="Top"/>
+        <Label Name="LblPassword"  Content="Heslo" HorizontalAlignment="Left" Margin="152,125,0,0" VerticalAlignment="Top"/>
     </Grid>
 </Window>

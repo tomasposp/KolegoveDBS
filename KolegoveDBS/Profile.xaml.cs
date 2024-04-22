@@ -36,7 +36,7 @@ namespace KolegoveDBS
                 using (MySqlConnection con = new MySqlConnection(constring))
                 {
                     await con.OpenAsync();
-                    string query = "SELECT c.name, c.email, c.phone, c.address, (SELECT IFNULL(SUM(o.amount), 0) FROM orders o WHERE co.order_id = o.order_id) AS total_amount, GROUP_CONCAT(o.order_list) AS orders, o.order_id FROM customer c LEFT JOIN customer_orders co ON c.customer_id = co.customer_id LEFT JOIN orders o ON co.order_id = o.order_id WHERE c.customer_id = @customerId GROUP BY c.name, c.email, c.phone, c.address, co.order_id, o.order_id; ";
+                    string query = "SELECT c.name, c.email, c.phone, c.address, (SELECT IFNULL(SUM(o.amount), 0) FROM orders o WHERE co.order_id = o.order_id) AS total_amount, GROUP_CONCAT(o.order_list) AS orders, o.order_id, o.rated, o.courier_id FROM customer c LEFT JOIN customer_orders co ON c.customer_id = co.customer_id LEFT JOIN orders o ON co.order_id = o.order_id WHERE c.customer_id = @customerId GROUP BY c.name, c.email, c.phone, c.address, co.order_id, o.order_id, o.rated,o.courier_id;";
 
                     using (MySqlCommand cmd = new MySqlCommand(query, con))
                     {
@@ -48,6 +48,9 @@ namespace KolegoveDBS
                             {
                                 while (await reader.ReadAsync())
                                 {
+                                    Boolean courier_id = reader.IsDBNull("courier_id");
+
+
                                     string name = reader.GetString("name");
                                     Name.Content = name;
 
@@ -59,7 +62,7 @@ namespace KolegoveDBS
 
                                     string address = reader.GetString("address");
                                     Address.Content = address;
-
+                                    Boolean rated = reader.GetBoolean("rated");
                                     decimal amount = reader.GetDecimal("total_amount");
 
                                     string orderListJson = reader.IsDBNull("orders") ? "" : reader.GetString("orders").Trim();
@@ -85,11 +88,49 @@ namespace KolegoveDBS
 
                                             StackPanel stackPanel = new StackPanel { Orientation = Orientation.Horizontal };
 
-                                            TextBox textBox = new TextBox { Text = "", Margin = new Thickness(2,2,2,10), Width = 30, Height = 20 };
-                                            TextBox textBoxComment = new TextBox { Text = "", Margin = new Thickness(2, 2, 2, 10), Width = 50, Height = 20 };
+                                            TextBlock thankYou = new TextBlock { Text = "Děkujeme za vaší recenzi!", Margin = new Thickness(2, 2, 2, 10), Width = 200, Height = 20 };
+                                            TextBlock delivery = new TextBlock { Text = "Vaše objednávka je v procesu!", Margin = new Thickness(2, 2, 2, 10), Width = 200, Height = 20 };
 
-                                            TextBox textBoxRest = new TextBox { Text = "", Margin = new Thickness(2, 2, 2, 10), Width = 30, Height = 20 };
-                                            TextBox textBoxCommentRest = new TextBox { Text = "", Margin = new Thickness(2, 2, 2, 10), Width = 50, Height = 20 };
+                                            TextBox textBox = new TextBox { Text = "", Margin = new Thickness(2, 2, 2, 10), Width = 35, Height = 20 };
+                                            textBox.PreviewTextInput += (sender, e) =>
+                                            {
+                                                if (!char.IsDigit(e.Text, 0))
+                                                {
+                                                    e.Handled = true;
+                                                }
+                                                else
+                                                {
+                                                    int value = int.Parse(textBox.Text + e.Text);
+
+
+                                                    if (value < 1 || value > 5)
+                                                    {
+                                                        e.Handled = true;
+                                                    }
+                                                }
+                                            };
+                                            TextBox textBoxComment = new TextBox { Text = "Komentář", Margin = new Thickness(2, 2, 2, 10), Width = 55, Height = 20 };
+
+                                            TextBox textBoxRest = new TextBox { Text = "", Margin = new Thickness(2, 2, 2, 10), Width = 35, Height = 20 };
+                                            textBoxRest.PreviewTextInput += (sender, e) =>
+                                            {
+                                                if (!char.IsDigit(e.Text, 0))
+                                                {
+                                                    e.Handled = true;
+                                                }
+                                                else
+                                                {
+                                                    int value = int.Parse(textBoxRest.Text + e.Text);
+
+
+                                                    if (value < 1 || value > 5)
+                                                    {
+                                                        e.Handled = true;
+                                                    }
+                                                }
+                                            };
+
+                                            TextBox textBoxCommentRest = new TextBox { Text = " ", Margin = new Thickness(2, 2, 2, 10), Width = 50, Height = 20 };
 
                                             Button saveButton = new Button { Content = "Uložit", Margin = new Thickness(2, 2, 2, 10) };
 
@@ -99,6 +140,12 @@ namespace KolegoveDBS
                                                 string comment = textBoxComment.Text;
                                                 string hodnoceniRest = textBoxRest.Text;
                                                 string commentRest = textBoxCommentRest.Text;
+
+                                                if (hodnoceni == "" || hodnoceniRest == "" || commentRest == "" || comment == "")
+                                                {
+                                                    MessageBox.Show("Pro hodnocení vyplňte všechny pole položky!");
+                                                    return;
+                                                }
                                                 try
                                                 {
                                                     using (MySqlConnection ratingCon = new MySqlConnection(constring))
@@ -130,7 +177,7 @@ namespace KolegoveDBS
                                                             string ratingDate = DateTime.Now.ToString("yyyy-MM-dd");
                                                             ratingCmd.Parameters.AddWithValue("@ratingDate", ratingDate);
                                                             await ratingCmd.ExecuteNonQueryAsync();
-                                                           
+
                                                         }
                                                     }
                                                     using (MySqlConnection ratingConRest = new MySqlConnection(constring))
@@ -162,25 +209,46 @@ namespace KolegoveDBS
                                                             string ratingDate = DateTime.Now.ToString("yyyy-MM-dd");
                                                             ratingCmdRest.Parameters.AddWithValue("@ratingDate", ratingDate);
                                                             await ratingCmdRest.ExecuteNonQueryAsync();
-                                                            MessageBox.Show("Hodnocení úspěšně uloženo!");
+                                                            MessageBox.Show("Hodnocení uloženo!");
+                                                        }
+                                                        string updateRating = "Update orders set rated = 1 where order_id = @orderId";
+                                                        using (MySqlCommand updateCmd = new MySqlCommand(updateRating, ratingConRest))
+                                                        {
+                                                            updateCmd.Parameters.AddWithValue("@orderId", orderId);
+                                                            updateCmd.ExecuteNonQuery();
                                                         }
                                                     }
 
                                                 }
                                                 catch (Exception ex)
                                                 {
-                                                    MessageBox.Show("Chyba při ukládání hodnocení: " + ex.Message, "Chyba", MessageBoxButton.OK, MessageBoxImage.Error);
+                                                    MessageBox.Show("Chyba při ukládání­ hodnocení­: " + ex.Message, "Chyba", MessageBoxButton.OK, MessageBoxImage.Error);
                                                 }
                                             };
 
+                                            if (rated == false)
+                                            {
+                                                if (courier_id == true)
+                                                {
+                                                    stackPanel.Children.Add(delivery);
+                                                    this.ContentPanel.Children.Add(stackPanel);
+                                                }
+                                                else
+                                                {
+                                                    stackPanel.Children.Add(textBox);
+                                                    stackPanel.Children.Add(textBoxComment);
+                                                    stackPanel.Children.Add(textBoxRest);
+                                                    stackPanel.Children.Add(textBoxCommentRest);
+                                                    stackPanel.Children.Add(saveButton);
+                                                    this.ContentPanel.Children.Add(stackPanel);
+                                                }
 
-                                            stackPanel.Children.Add(textBox);
-                                            stackPanel.Children.Add(textBoxComment);
-                                            stackPanel.Children.Add(textBoxRest);
-                                            stackPanel.Children.Add(textBoxCommentRest);
-                                            stackPanel.Children.Add(saveButton);
-
-                                            this.ContentPanel.Children.Add(stackPanel);
+                                            }
+                                            else
+                                            {
+                                                stackPanel.Children.Add(thankYou);
+                                                this.ContentPanel.Children.Add(stackPanel);
+                                            }
                                         }
                                     }
                                 }
@@ -195,7 +263,7 @@ namespace KolegoveDBS
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Chyba při načítání informací o zákazníkovi: " + ex.Message, "Chyba", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ex.Message, "Chyba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
