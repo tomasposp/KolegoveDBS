@@ -18,7 +18,7 @@
         <Label Content="Telefoní číslo" HorizontalAlignment="Left" Margin="167,161,0,0" VerticalAlignment="Top"/>
         <Label Content="Adresa" HorizontalAlignment="Left" Margin="167,209,0,0" VerticalAlignment="Top"/>
         <Label Content="Heslo" HorizontalAlignment="Left" Margin="167,264,0,0" VerticalAlignment="Top"/>
-
+        <Button Name="Back" Content="Zpět na hlavní nabídku" HorizontalAlignment="Left" Margin="635,29,0,0" VerticalAlignment="Top" Click="Back_Click"/>
 
     </Grid>
 </Window>

@@ -50,100 +50,79 @@ namespace KolegoveDBS
             string password = "admin";
             string constring = "Server=" + server + "; database=" + database + "; uid=" + uid + "; pwd=" + password;
 
-            using (MySqlConnection con = new MySqlConnection(constring))
+            try
             {
-                con.Open();
-                string query = "SELECT COUNT(*), MAX(customer_id) FROM customer WHERE email = @Email AND password = @Password";
-                using (MySqlCommand cmd = new MySqlCommand(query, con))
+                using (MySqlConnection con = new MySqlConnection(constring))
                 {
-                    cmd.Parameters.AddWithValue("@Email", EmailTB.Text);
-                    cmd.Parameters.AddWithValue("@Password", ToSha256(PasswordTB.Text));
-                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    con.Open();
+                    string query =
+                                    "SELECT email, password, 'administrator' AS role, admin_id as id FROM administrator " +
+                                    "WHERE email = @username AND password = @password " +
+                                    "UNION ALL " +
+                                    "SELECT email, password, 'customer' AS role, customer_id as id FROM customer " +
+                                    "WHERE email = @username AND password = @password " +
+                                    "UNION ALL " +
+                                    "SELECT email, password, 'courier' AS role, courier_id as id FROM courier " +
+                                    "WHERE email = @username AND password = @password ";
+
+
+                    using (MySqlCommand cmd = new MySqlCommand(query, con))
                     {
-                        if (reader.Read())
+                        cmd.Parameters.AddWithValue("@username", EmailTB.Text);
+                        cmd.Parameters.AddWithValue("@password", ToSha256(PasswordTB.Text));
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
-                            int count = reader.GetInt32(0);
-                            if (count > 0)
+                            if (reader.Read())
                             {
-                                MessageBox.Show("Přihlášení úspěšné!");
-                                MainWindow win = new MainWindow(1, reader.GetInt32(1), 0, 0);
-                                win.Top = this.Top;
-                                win.Left = this.Left;
-                                win.Show();
-                                this.Close();
+                                string role = reader.GetString(2);
+                                if (role == "administrator")
+                                {
+                                    MessageBox.Show("Přihlášení úspěšné!");
+                                    MainWindow win = new MainWindow(1, reader.GetInt32(3), 1, 0);
+                                    win.Top = this.Top;
+                                    win.Left = this.Left;
+                                    win.Show();
+                                    this.Close();
+                                }
+                                else if (role == "customer")
+                                {
+                                    MessageBox.Show("Přihlášení úspěšné!");
+                                    MainWindow win = new MainWindow(1, reader.GetInt32(3), 0, 0);
+                                    win.Top = this.Top;
+                                    win.Left = this.Left;
+                                    win.Show();
+                                    this.Close();
+                                }
+                                else if (role == "courier")
+                                {
+                                    MessageBox.Show("Přihlášení úspěšné!");
+                                    MainWindow win = new MainWindow(1, reader.GetInt32(3), 0, 1);
+                                    win.Top = this.Top;
+                                    win.Left = this.Left;
+                                    win.Show();
+                                    this.Close();
+                                }
                             }
                             else
                             {
-
-                                MessageBox.Show("Neplatné přihlašovací údaje. Zkuste to znovu.");
+                                MessageBox.Show("Zadali jste špatné přihlašovací údaje!");
                             }
                         }
                     }
                 }
             }
-
-            using (MySqlConnection con = new MySqlConnection(constring))
+            catch (Exception ex)
             {
-                con.Open();
-                string query = "SELECT COUNT(*), MAX(admin_id) FROM administrator WHERE email = @Email AND password = @Password";
-                using (MySqlCommand cmd = new MySqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@Email", EmailTB.Text);
-                    cmd.Parameters.AddWithValue("@Password", ToSha256(PasswordTB.Text));
-                    using (MySqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            int count = reader.GetInt32(0);
-                            if (count > 0)
-                            {
-                                MessageBox.Show("Přihlášení úspěšné!");
-                                MainWindow win = new MainWindow(1, reader.GetInt32(1), 1, 0);
-                                win.Top = this.Top;
-                                win.Left = this.Left;
-                                win.Show();
-                                this.Close();
-                            }
-                            else
-                            {
-                                //MessageBox.Show("Neplatné přihlašovací údaje. Zkuste to znovu.");
-                            }
-                        }
-                    }
-                }
+                MessageBox.Show(ex.Message);
             }
-
-            using (MySqlConnection con = new MySqlConnection(constring))
-            {
-                con.Open();
-                string query = "SELECT COUNT(*), MAX(courier_id) FROM courier WHERE email = @Email AND password = @Password";
-                using (MySqlCommand cmd = new MySqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@Email", EmailTB.Text);
-                    cmd.Parameters.AddWithValue("@Password", ToSha256(PasswordTB.Text));
-                    using (MySqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            int count = reader.GetInt32(0);
-                            if (count > 0)
-                            {
-                                MessageBox.Show("Přihlášení úspěšné!");
-                                MainWindow win = new MainWindow(1, reader.GetInt32(1), 0, 1);
-                                win.Top = this.Top;
-                                win.Left = this.Left;
-                                win.Show();
-                                this.Close();
-                            }
-                            else
-                            {
-                                //MessageBox.Show("Neplatné přihlašovací údaje. Zkuste to znovu.");
-                            }
-                        }
-                    }
-                }
-            }
-
+        }
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            MainWindow win = new MainWindow(0, 0, 0, 0);
+            win.Top = this.Top;
+            win.Left = this.Left;
+            win.Show();
+            this.Close();
         }
     }
 }

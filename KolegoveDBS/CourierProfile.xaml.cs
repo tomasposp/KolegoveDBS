@@ -73,7 +73,7 @@ namespace KolegoveDBS
 
         private void Back_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow win = new MainWindow(1, courierId, 0, 0);
+            MainWindow win = new MainWindow(1, courierId, 0, 1);
             win.Top = this.Top;
             win.Left = this.Left;
             win.Show();

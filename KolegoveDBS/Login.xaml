@@ -10,6 +10,6 @@
         <TextBox Name="EmailTB" HorizontalAlignment="Left" Margin="225,79,0,0" TextWrapping="Wrap" Text="pospa@seznam.cz" VerticalAlignment="Top" Width="120"/>
         <TextBox Name="PasswordTB" HorizontalAlignment="Left" Margin="225,129,0,0" TextWrapping="Wrap" Text="admin" VerticalAlignment="Top" Width="120"/>
         <Button Name="LoginBtn" Content="Login" HorizontalAlignment="Left" Margin="245,239,0,0" VerticalAlignment="Top" Click="LoginBtn_Click"/>
-
+        <Button Name="Back" Content="Zpět na hlavní nabídku" HorizontalAlignment="Left" Margin="635,29,0,0" VerticalAlignment="Top" Click="Back_Click"/>
     </Grid>
 </Window>

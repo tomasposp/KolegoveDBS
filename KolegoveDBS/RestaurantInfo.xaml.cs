@@ -209,9 +209,10 @@ namespace KolegoveDBS
                 }
 
 
-                string insertPaymentQuery = "INSERT INTO payment values (@order_id, @payment_method, @payment_date, @total_amount, @payment_status, @tip)";
+                string insertPaymentQuery = "INSERT INTO payment values (@payment_id, @order_id, @payment_method, @payment_date, @total_amount, @payment_status, @tip)";
                 using (MySqlCommand cmd = new MySqlCommand(insertPaymentQuery, con))
                 {
+                    cmd.Parameters.AddWithValue("@payment_id", cmd.LastInsertedId);
                     cmd.Parameters.AddWithValue("@order_id", orderId);
                     cmd.Parameters.AddWithValue("@payment_method", payment_method);
                     cmd.Parameters.AddWithValue("@payment_date", DateTime.Now.ToString());

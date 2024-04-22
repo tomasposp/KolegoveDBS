@@ -1,5 +1,6 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Intrinsics.Arm;
@@ -50,11 +51,12 @@ namespace KolegoveDBS
         private void Register_Click(object sender, RoutedEventArgs e)
         {
             StringBuilder bu = new StringBuilder();
-            if (NameTB.Text == null && EmailTB.Text == null && NumberTB.Text == null && AddressTB.Text == null && PasswordTB.Password == null)
+            if (NameTB.Text == "" || EmailTB.Text == "" || NumberTB.Text == "" || AddressTB.Text == "" || PasswordTB.Password == "")
             {
                 MessageBox.Show("Pro registraci vyplňte všechny pole");
                 return;
             }
+
             string server = "localhost";
             string database = "kolegovedb";
             string uid = "root";
@@ -63,6 +65,26 @@ namespace KolegoveDBS
             using (MySqlConnection con = new MySqlConnection(constring))
             {
                 con.Open();
+                string selectQuery = "SELECT COUNT(*) FROM customer WHERE email = @email " +
+                    " UNION ALL " +
+                    " SELECT COUNT(*) FROM courier WHERE email = @email"
+                    + " UNION ALL " + " SELECT COUNT(*) FROM administrator Where email = @email ;";
+                using (MySqlCommand cmd = new MySqlCommand(selectQuery, con))
+                {
+                    cmd.Parameters.AddWithValue("@email", EmailTB.Text);
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            int count = reader.GetInt32(0);
+                            if (count > 0)
+                            {
+                                MessageBox.Show("Tato emailová adresa je již zaregistrovaná!");
+                                return;
+                            }
+                        }
+                    }
+                }
                 string query = "INSERT INTO customer(name, email, phone, address, password, registration_date) VALUES(@Name, @Email, @Phone, @Address, @Password, @RegistrationDate)";
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -89,6 +111,15 @@ namespace KolegoveDBS
                     }
                 }
             }
+        }
+
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            MainWindow win = new MainWindow(0, 0, 0, 0);
+            win.Top = this.Top;
+            win.Left = this.Left;
+            win.Show();
+            this.Close();
         }
 
     }
